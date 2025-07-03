@@ -1,0 +1,28 @@
+run =  ["gunicorn", "--bind", "0.0.0.0:5000", "main:app"]
+entrypoint = "main.py"
+modules = ["python-3.11"]
+
+hidden = [".pythonlibs"]
+
+[nix]
+channel = "stable-24_05"
+
+[deployment]
+run =  ["gunicorn", "--bind", "0.0.0.0:5000", "main:app"]
+deploymentTarget = "cloudrun"
+
+[[ports]]
+localPort = 5000
+externalPort = 80
+
+[workflows]
+runButton = "Run O-kharcha"
+
+[[workflows.workflow]]
+name = "Run O-kharcha"
+author = 44490528
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "python main.py"
