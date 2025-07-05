@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Access - O-kharcha Database 🇳🇵</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .admin-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            padding: 40px;
+            max-width: 400px;
+            width: 100%;
+            border: 3px solid #e74c3c;
+        }
+
+        .nepal-flag {
+            background: linear-gradient(45deg, #DC143C, #003893);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .form-control {
+            border-radius: 10px;
+            border: 2px solid #e9ecef;
+            padding: 12px 15px;
+        }
+
+        .form-control:focus {
+            border-color: #e74c3c;
+            box-shadow: 0 0 0 0.2rem rgba(231, 76, 60, 0.25);
+        }
+
+        .btn-danger {
+            background: #e74c3c;
+            border: none;
+            border-radius: 25px;
+            padding: 12px 25px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-danger:hover {
+            background: #c0392b;
+            transform: translateY(-2px);
+        }
+
+        .warning-box {
+            background: rgba(255, 193, 7, 0.1);
+            border: 2px solid #ffc107;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <div class="text-center mb-4">
+            <i class="fas fa-database fa-3x text-danger mb-3"></i>
+            <h2 class="nepal-flag">Database Access</h2>
+            <p class="text-muted">O-kharcha Admin Panel 🇳🇵</p>
+        </div>
+
+        <div class="warning-box">
+            <h6 class="text-warning mb-2">
+                <i class="fas fa-exclamation-triangle me-2"></i>Restricted Access
+            </h6>
+            <small class="text-muted">
+                This area is restricted to authorized administrators only. 
+                Unauthorized access is prohibited.
+            </small>
+        </div>
+
+        <div id="alertArea"></div>
+
+        <form id="adminLoginForm">
+            <div class="mb-3">
+                <label for="username" class="form-label">Admin Username</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-user-shield"></i></span>
+                    <input type="text" class="form-control" id="username" required placeholder="Enter admin username">
+                </div>
+            </div>
+            
+            <div class="mb-3">
+                <label for="password" class="form-label">Admin Password</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-key"></i></span>
+                    <input type="password" class="form-control" id="password" required placeholder="Enter admin password">
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-danger w-100">
+                <i class="fas fa-sign-in-alt me-2"></i>Access Database
+            </button>
+        </form>
+
+        <div class="text-center mt-4">
+            <a href="/login" class="btn btn-outline-secondary btn-sm">
+                <i class="fas fa-arrow-left me-1"></i>Back to User Login
+            </a>
+        </div>
+
+        <div class="text-center mt-4">
+            <small class="text-muted">
+                Developer: <strong>Bigyan Bhandari</strong> © 2025
+            </small>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function showAlert(message, type = 'info') {
+            const alertArea = document.getElementById('alertArea');
+            const alertHTML = `
+                <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            `;
+            alertArea.innerHTML = alertHTML;
+            
+            setTimeout(() => {
+                const alert = alertArea.querySelector('.alert');
+                if (alert) {
+                    const bsAlert = new bootstrap.Alert(alert);
+                    bsAlert.close();
+                }
+            }, 5000);
+        }
+
+        document.getElementById('adminLoginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            fetch('/api/admin/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    username: username,
+                    password: password
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showAlert(data.message, 'success');
+                    setTimeout(() => {
+                        window.location.href = '/admin/dashboard';
+                    }, 1000);
+                } else {
+                    showAlert(data.error || 'Access denied', 'danger');
+                }
+            })
+            .catch(error => {
+                console.error('Error during admin login:', error);
+                showAlert('Access denied. Please try again.', 'danger');
+            });
+        });
+    </script>
+</body>
+</html>
