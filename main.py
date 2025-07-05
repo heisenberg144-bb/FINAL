@@ -8,15 +8,40 @@ Made with love for Nepal 🇳🇵
 
 from flask import Flask, request, jsonify, render_template, redirect, url_for, send_from_directory, session
 import sqlite3
+import psycopg2
+import psycopg2.extras
+from urllib.parse import urlparse
 import re
 import json
 from datetime import datetime, timedelta
 import os
 from functools import wraps
 import hashlib
+from database import db
 
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'okharcha-secret-key-nepal')
+
+# Database configuration
+DATABASE_URL = os.environ.get('DATABASE_URL')
+USE_POSTGRES = DATABASE_URL is not None
+
+def get_db_connection():
+    """Get database connection based on environment"""
+    if USE_POSTGRES:
+        # Parse DATABASE_URL for PostgreSQL
+        url = urlparse(DATABASE_URL)
+        conn = psycopg2.connect(
+            database=url.path[1:],
+            user=url.username,
+            password=url.password,
+            host=url.hostname,
+            port=url.port
+        )
+        return conn
+    else:
+        # Fallback to SQLite for local development
+        return sqlite3.connect('okharcha.db')
 
 # Developer/Admin access control
 ADMIN_USERS = {
@@ -34,14 +59,20 @@ def verify_password(password, hashed):
 
 def authenticate_user(username, password):
     """Authenticate regular user"""
-    conn = sqlite3.connect('okharcha.db')
-    cursor = conn.cursor()
-    cursor.execute('SELECT password_hash FROM users WHERE username = ?', (username,))
+    conn = get_db_connection()
+    if USE_POSTGRES:
+        cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+        cursor.execute('SELECT password_hash FROM users WHERE username = %s', (username,))
+    else:
+        cursor = conn.cursor()
+        cursor.execute('SELECT password_hash FROM users WHERE username = ?', (username,))
     result = cursor.fetchone()
     conn.close()
     
-    if result and verify_password(password, result[0]):
-        return True
+    if result:
+        password_hash = result['password_hash'] if USE_POSTGRES else result[0]
+        if verify_password(password, password_hash):
+            return True
     return False
 
 def authenticate_admin(username, password):
@@ -74,8 +105,11 @@ def login_required(f):
 
 # Database initialization
 def init_db():
-    conn = sqlite3.connect('okharcha.db')
-    cursor = conn.cursor()
+    conn = get_db_connection()
+    if USE_POSTGRES:
+        cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+    else:
+        cursor = conn.cursor()
 
     # Create users table
     cursor.execute('''
@@ -219,13 +253,19 @@ def get_user_id():
     if 'user' not in session:
         return None
     
-    conn = sqlite3.connect('okharcha.db')
-    cursor = conn.cursor()
-    cursor.execute('SELECT id FROM users WHERE username = ?', (session['user'],))
+    conn = get_db_connection()
+    if USE_POSTGRES:
+        cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+        cursor.execute('SELECT id FROM users WHERE username = %s', (session['user'],))
+    else:
+        cursor = conn.cursor()
+        cursor.execute('SELECT id FROM users WHERE username = ?', (session['user'],))
     result = cursor.fetchone()
     conn.close()
     
-    return result[0] if result else None
+    if result:
+        return result['id'] if USE_POSTGRES else result[0]
+    return None
 
 # SMS Parser for Nepali banks
 def parse_sms_amount(sms_text):
@@ -251,40 +291,54 @@ def get_current_month_year():
     return datetime.now().strftime('%Y-%m')
 
 def get_monthly_budget(user_id):
-    conn = sqlite3.connect('okharcha.db')
-    cursor = conn.cursor()
+    conn = get_db_connection()
     current_month = get_current_month_year()
 
-    cursor.execute('SELECT monthly_limit, current_spent FROM budget WHERE user_id = ? AND month_year = ?', (user_id, current_month))
+    if USE_POSTGRES:
+        cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+        cursor.execute('SELECT monthly_limit, current_spent FROM budget WHERE user_id = %s AND month_year = %s', (user_id, current_month))
+    else:
+        cursor = conn.cursor()
+        cursor.execute('SELECT monthly_limit, current_spent FROM budget WHERE user_id = ? AND month_year = ?', (user_id, current_month))
+    
     result = cursor.fetchone()
     conn.close()
 
     if result:
-        return result[0], result[1]
+        if USE_POSTGRES:
+            return result['monthly_limit'], result['current_spent']
+        else:
+            return result[0], result[1]
     return 0, 0
 
 def update_monthly_spent(user_id, amount):
-    conn = sqlite3.connect('okharcha.db')
-    cursor = conn.cursor()
+    conn = get_db_connection()
     current_month = get_current_month_year()
 
-    # Check if budget entry exists for current month
-    cursor.execute('SELECT id, monthly_limit, current_spent FROM budget WHERE user_id = ? AND month_year = ?', (user_id, current_month))
+    if USE_POSTGRES:
+        cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+        cursor.execute('SELECT id, monthly_limit, current_spent FROM budget WHERE user_id = %s AND month_year = %s', (user_id, current_month))
+    else:
+        cursor = conn.cursor()
+        cursor.execute('SELECT id, monthly_limit, current_spent FROM budget WHERE user_id = ? AND month_year = ?', (user_id, current_month))
+
     result = cursor.fetchone()
 
     if result:
         # Update existing budget
-        budget_id, monthly_limit, current_spent = result
-        new_spent = current_spent + amount
-        cursor.execute('''
-            UPDATE budget SET current_spent = ? WHERE id = ?
-        ''', (new_spent, budget_id))
+        if USE_POSTGRES:
+            budget_id, monthly_limit, current_spent = result['id'], result['monthly_limit'], result['current_spent']
+            cursor.execute('UPDATE budget SET current_spent = %s WHERE id = %s', (current_spent + amount, budget_id))
+        else:
+            budget_id, monthly_limit, current_spent = result
+            new_spent = current_spent + amount
+            cursor.execute('UPDATE budget SET current_spent = ? WHERE id = ?', (new_spent, budget_id))
     else:
         # Create new budget entry with 0 limit if none exists
-        cursor.execute('''
-            INSERT INTO budget (user_id, monthly_limit, current_spent, month_year)
-            VALUES (?, 0, ?, ?)
-        ''', (user_id, amount, current_month))
+        if USE_POSTGRES:
+            cursor.execute('INSERT INTO budget (user_id, monthly_limit, current_spent, month_year) VALUES (%s, 0, %s, %s)', (user_id, amount, current_month))
+        else:
+            cursor.execute('INSERT INTO budget (user_id, monthly_limit, current_spent, month_year) VALUES (?, 0, ?, ?)', (user_id, amount, current_month))
 
     conn.commit()
     conn.close()
@@ -334,19 +388,26 @@ def api_register():
         return jsonify({'error': 'Password must be at least 6 characters'}), 400
     
     # Check if username already exists
-    conn = sqlite3.connect('okharcha.db')
-    cursor = conn.cursor()
-    cursor.execute('SELECT id FROM users WHERE username = ?', (username,))
+    conn = get_db_connection()
+    if USE_POSTGRES:
+        cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+        cursor.execute('SELECT id FROM users WHERE username = %s', (username,))
+    else:
+        cursor = conn.cursor()
+        cursor.execute('SELECT id FROM users WHERE username = ?', (username,))
+    
     if cursor.fetchone():
         conn.close()
         return jsonify({'error': 'Username already exists'}), 400
     
     # Create new user
     password_hash = hash_password(password)
-    cursor.execute('''
-        INSERT INTO users (username, password_hash, email, full_name)
-        VALUES (?, ?, ?, ?)
-    ''', (username, password_hash, email, full_name))
+    if USE_POSTGRES:
+        cursor.execute('INSERT INTO users (username, password_hash, email, full_name) VALUES (%s, %s, %s, %s)', 
+                      (username, password_hash, email, full_name))
+    else:
+        cursor.execute('INSERT INTO users (username, password_hash, email, full_name) VALUES (?, ?, ?, ?)', 
+                      (username, password_hash, email, full_name))
     
     conn.commit()
     conn.close()
@@ -755,17 +816,13 @@ def add_expense():
     if not user_id:
         return jsonify({'error': 'User not found'}), 401
 
-    conn = sqlite3.connect('okharcha.db')
-    cursor = conn.cursor()
-
     today = datetime.now().strftime('%Y-%m-%d')
-    cursor.execute('''
+    
+    # Use database manager for consistent handling
+    db.execute_query('''
         INSERT INTO expenses (user_id, amount, description, category, date, type)
         VALUES (?, ?, ?, ?, ?, ?)
     ''', (user_id, amount, description, category, today, 'expense'))
-
-    conn.commit()
-    conn.close()
 
     # Update monthly spent
     update_monthly_spent(user_id, amount)
