@@ -1,0 +1,2004 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>O-kharcha - Smart Expenditure Management 🇳🇵</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --success-color: #27ae60;
+            --warning-color: #f39c12;
+            --danger-color: #e74c3c;
+            --nepal-red: #DC143C;
+            --nepal-blue: #003893;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .navbar {
+            background: var(--primary-color) !important;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .btn-primary {
+            background: var(--secondary-color);
+            border: none;
+            border-radius: 25px;
+            padding: 10px 25px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+        }
+
+        .nepal-flag {
+            background: linear-gradient(45deg, var(--nepal-red), var(--nepal-blue));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .progress {
+            height: 10px;
+            border-radius: 50px;
+        }
+
+        .expense-item {
+            border-left: 4px solid var(--secondary-color);
+            margin-bottom: 10px;
+            padding: 15px;
+            background: white;
+            border-radius: 10px;
+        }
+
+        .amount {
+            font-weight: bold;
+            color: var(--danger-color);
+        }
+
+        .income {
+            color: var(--success-color);
+        }
+
+        .alert {
+            border: none;
+            border-radius: 15px;
+        }
+
+        .nav-tabs .nav-link {
+            border: none;
+            border-radius: 25px;
+            margin: 0 5px;
+            color: var(--primary-color);
+        }
+
+        .nav-tabs .nav-link.active {
+            background: var(--secondary-color);
+            color: white;
+        }
+
+        .form-control {
+            border-radius: 10px;
+            border: 2px solid #e9ecef;
+            padding: 12px 15px;
+        }
+
+        .form-control:focus {
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+        }
+
+        .feature-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+        }
+
+        .sms-parser {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .budget-tracker {
+            background: linear-gradient(135deg, #f093fb, #f5576c);
+            color: white;
+        }
+
+        .analytics {
+            background: linear-gradient(135deg, #4facfe, #00f2fe);
+            color: white;
+        }
+
+        .memo-card {
+            background: linear-gradient(135deg, #a8edea, #fed6e3);
+            color: #333;
+        }
+
+        .bills-card {
+            background: linear-gradient(135deg, #ffecd2, #fcb69f);
+            color: #333;
+        }
+
+        .database-access-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+
+        /* Enhanced Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .card {
+            animation: fadeInUp 0.6s ease-out;
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+
+        .btn {
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .nav-tabs .nav-link {
+            transition: all 0.3s ease;
+        }
+
+        .nav-tabs .nav-link:hover {
+            transform: translateY(-2px);
+        }
+
+        .expense-item, .memo-item, .bill-item {
+            animation: slideInLeft 0.5s ease-out;
+            transition: all 0.3s ease;
+        }
+
+        .expense-item:hover, .memo-item:hover, .bill-item:hover {
+            transform: translateX(10px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .progress-bar {
+            animation: progressFill 1s ease-out;
+        }
+
+        @keyframes progressFill {
+            from {
+                width: 0%;
+            }
+        }
+
+        /* Memo specific styles */
+        .memo-item {
+            border-left: 4px solid #17a2b8;
+            margin-bottom: 15px;
+            padding: 15px;
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border-radius: 10px;
+        }
+
+        .memo-priority-high {
+            border-left-color: #dc3545;
+        }
+
+        .memo-priority-medium {
+            border-left-color: #ffc107;
+        }
+
+        .memo-priority-low {
+            border-left-color: #28a745;
+        }
+
+        /* Bill specific styles */
+        .bill-item {
+            border-left: 4px solid #6f42c1;
+            margin-bottom: 15px;
+            padding: 15px;
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border-radius: 10px;
+        }
+
+        .bill-paid {
+            border-left-color: #28a745;
+            background: linear-gradient(135deg, #d4edda, #c3e6cb);
+        }
+
+        .bill-pending {
+            border-left-color: #dc3545;
+            background: linear-gradient(135deg, #f8d7da, #f5c6cb);
+        }
+
+        .bill-overdue {
+            border-left-color: #e83e8c;
+            background: linear-gradient(135deg, #f8d7da, #f5c6cb);
+            animation: pulse 2s infinite;
+        }
+
+        /* Enhanced Interactive Features */
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin: 20px 0;
+        }
+
+        .expense-velocity {
+            background: linear-gradient(135deg, #ff6b6b, #feca57);
+            color: white;
+        }
+
+        .smart-recommendations {
+            background: linear-gradient(135deg, #48dbfb, #0abde3);
+            color: white;
+        }
+
+        .expense-predictor {
+            background: linear-gradient(135deg, #ff9ff3, #f368e0);
+            color: white;
+        }
+
+        /* Real-time Notifications */
+        .notification-container {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            z-index: 9999;
+            max-width: 350px;
+        }
+
+        .notification {
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 10px;
+            transform: translateX(400px);
+            transition: all 0.5s ease;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .notification.success {
+            border-left: 4px solid #27ae60;
+        }
+
+        .notification.warning {
+            border-left: 4px solid #f39c12;
+        }
+
+        .notification.danger {
+            border-left: 4px solid #e74c3c;
+        }
+
+        /* Interactive Expense Items */
+        .expense-item-interactive {
+            background: linear-gradient(135deg, #f8f9fa, #ffffff);
+            border: none;
+            border-left: 4px solid var(--secondary-color);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        }
+
+        .expense-item-interactive:hover {
+            transform: translateX(10px) scale(1.02);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+            border-left-width: 8px;
+        }
+
+        /* Smart Budget Gauge */
+        .budget-gauge {
+            width: 200px;
+            height: 200px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .gauge-fill {
+            transition: stroke-dasharray 1s ease-in-out;
+        }
+
+        /* Floating Action Button */
+        .fab {
+            position: fixed;
+            bottom: 80px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+            font-size: 24px;
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .fab:hover {
+            transform: scale(1.1) rotate(90deg);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+        }
+
+        /* Theme Toggle */
+        .theme-toggle {
+            position: fixed;
+            top: 50%;
+            right: 20px;
+            transform: translateY(-50%);
+            z-index: 1000;
+        }
+
+        .dark-theme {
+            background: linear-gradient(135deg, #2c3e50, #34495e) !important;
+        }
+
+        .dark-theme .card {
+            background: rgba(255, 255, 255, 0.1) !important;
+            color: white !important;
+            backdrop-filter: blur(10px);
+        }
+
+        /* Voice Recognition Animation */
+        .voice-btn {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .voice-btn.recording::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            animation: voiceWave 1s infinite;
+        }
+
+        @keyframes voiceWave {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        /* Smart Insights Panel */
+        .insights-panel {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border-radius: 20px;
+            padding: 25px;
+            margin: 20px 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .insights-panel::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: insightGlow 3s ease-in-out infinite;
+        }
+
+        @keyframes insightGlow {
+            0%, 100% { opacity: 0; }
+            50% { opacity: 1; }
+        }
+
+        /* Category Quick Add */
+        .category-quick-add {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin: 15px 0;
+        }
+
+        .category-btn {
+            background: rgba(52, 152, 219, 0.1);
+            border: 2px solid var(--secondary-color);
+            color: var(--secondary-color);
+            border-radius: 25px;
+            padding: 8px 16px;
+            font-size: 12px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .category-btn:hover, .category-btn.active {
+            background: var(--secondary-color);
+            color: white;
+            transform: scale(1.05);
+        }
+
+        @media (max-width: 768px) {
+            .container-fluid {
+                padding: 10px;
+            }
+
+            .card {
+                margin-bottom: 20px;
+            }
+
+            .notification-container {
+                right: 10px;
+                left: 10px;
+                max-width: none;
+            }
+
+            .fab {
+                bottom: 100px;
+                right: 15px;
+            }
+
+            .theme-toggle {
+                top: 20px;
+                right: 15px;
+                transform: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-coins me-2"></i>
+                <span class="nepal-flag">O-kharcha</span>
+                <small class="ms-2">🇳🇵</small>
+            </a>
+            <div class="navbar-nav ms-auto">
+                <span class="navbar-text">
+                    Welcome, {{ user }}! 
+                    <button class="btn btn-outline-light btn-sm ms-2" onclick="logout()">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </button>
+                </span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Real-time Notifications -->
+    <div class="notification-container" id="notificationContainer"></div>
+
+    <!-- Theme Toggle -->
+    <div class="theme-toggle">
+        <button class="btn btn-outline-light btn-sm" onclick="toggleTheme()">
+            <i class="fas fa-moon" id="themeIcon"></i>
+        </button>
+    </div>
+
+    <div class="container-fluid mt-4">
+        <!-- Alert Area -->
+        <div id="alertArea"></div>
+
+        <!-- Main Content Tabs -->
+        <ul class="nav nav-tabs justify-content-center mb-4" id="mainTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="dashboard-tab" data-bs-toggle="tab" data-bs-target="#dashboard" type="button" role="tab">
+                    <i class="fas fa-tachometer-alt"></i> Dashboard
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="expenses-tab" data-bs-toggle="tab" data-bs-target="#expenses" type="button" role="tab">
+                    <i class="fas fa-receipt"></i> Expenses
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="memos-tab" data-bs-toggle="tab" data-bs-target="#memos" type="button" role="tab">
+                    <i class="fas fa-sticky-note"></i> Daily Memos
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="bills-tab" data-bs-toggle="tab" data-bs-target="#bills" type="button" role="tab">
+                    <i class="fas fa-file-invoice"></i> Bills
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="sms-tab" data-bs-toggle="tab" data-bs-target="#sms" type="button" role="tab">
+                    <i class="fas fa-sms"></i> SMS Parser
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="analytics-tab" data-bs-toggle="tab" data-bs-target="#analytics" type="button" role="tab">
+                    <i class="fas fa-chart-pie"></i> Analytics
+                </button>
+            </li>
+        </ul>
+
+        <div class="tab-content" id="mainTabContent">
+            <!-- Dashboard Tab -->
+            <div class="tab-pane fade show active" id="dashboard" role="tabpanel">
+                <div class="row">
+                    <!-- Smart Budget Gauge -->
+                    <div class="col-md-6 mb-4" data-aos="fade-up">
+                        <div class="card budget-tracker">
+                            <div class="card-body">
+                                <h5 class="card-title">
+                                    <i class="fas fa-gauge-high me-2"></i>Smart Budget Gauge
+                                </h5>
+                                <div id="budgetStatus">
+                                    <div class="text-center">
+                                        <div class="spinner-border text-light" role="status">
+                                            <span class="visually-hidden">Loading...</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="chart-container">
+                                    <canvas id="budgetGaugeChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Expense Velocity Meter -->
+                    <div class="col-md-6 mb-4" data-aos="fade-up" data-aos-delay="100">
+                        <div class="card expense-velocity">
+                            <div class="card-body">
+                                <h5 class="card-title">
+                                    <i class="fas fa-tachometer-alt me-2"></i>Spending Velocity
+                                </h5>
+                                <div id="expenseVelocity">
+                                    <div class="text-center">
+                                        <h3 class="animated-counter">Rs. 0/day</h3>
+                                        <p class="mb-0">Average Daily Spending</p>
+                                    </div>
+                                </div>
+                                <div class="chart-container">
+                                    <canvas id="velocityChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Smart Quick Add Expense -->
+                    <div class="col-md-6 mb-4" data-aos="fade-up" data-aos-delay="200">
+                        <div class="card feature-card">
+                            <div class="card-body">
+                                <h5 class="card-title">
+                                    <i class="fas fa-magic me-2"></i>Smart Quick Add
+                                </h5>
+                                <form id="expenseForm">
+                                    <div class="mb-3 position-relative">
+                                        <input type="number" class="form-control" id="expenseAmount" placeholder="Amount (Rs.)" required>
+                                        <button type="button" class="btn btn-outline-secondary btn-sm voice-btn" id="voiceBtn" style="position: absolute; right: 5px; top: 5px;">
+                                            <i class="fas fa-microphone"></i>
+                                        </button>
+                                    </div>
+                                    <div class="mb-3">
+                                        <input type="text" class="form-control" id="expenseDescription" placeholder="Description or say 'lunch', 'taxi', etc.">
+                                    </div>
+                                    
+                                    <!-- Category Quick Select -->
+                                    <div class="category-quick-add mb-3">
+                                        <div class="category-btn" data-category="food">🍔 Food</div>
+                                        <div class="category-btn" data-category="transport">🚗 Transport</div>
+                                        <div class="category-btn" data-category="entertainment">🎬 Fun</div>
+                                        <div class="category-btn" data-category="shopping">🛒 Shopping</div>
+                                        <div class="category-btn" data-category="utilities">⚡ Bills</div>
+                                        <div class="category-btn" data-category="general">📝 Other</div>
+                                    </div>
+                                    
+                                    <select class="form-control mb-3" id="expenseCategory" style="display: none;">
+                                        <option value="food">Food</option>
+                                        <option value="transport">Transport</option>
+                                        <option value="entertainment">Entertainment</option>
+                                        <option value="shopping">Shopping</option>
+                                        <option value="utilities">Utilities</option>
+                                        <option value="general">General</option>
+                                    </select>
+                                    
+                                    <button type="submit" class="btn btn-primary w-100">
+                                        <i class="fas fa-plus me-2"></i>Add Expense
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Smart Insights Panel -->
+                    <div class="col-md-12 mb-4" data-aos="fade-up" data-aos-delay="300">
+                        <div class="insights-panel">
+                            <h5><i class="fas fa-brain me-2"></i>Smart Financial Insights</h5>
+                            <div id="smartInsights">
+                                <div class="row">
+                                    <div class="col-md-4 text-center">
+                                        <h3 id="insightSpending">Rs. 0</h3>
+                                        <p>This Week</p>
+                                    </div>
+                                    <div class="col-md-4 text-center">
+                                        <h3 id="insightSavings">0%</h3>
+                                        <p>Savings Rate</p>
+                                    </div>
+                                    <div class="col-md-4 text-center">
+                                        <h3 id="insightTrend">📈</h3>
+                                        <p>Spending Trend</p>
+                                    </div>
+                                </div>
+                                <div class="mt-3">
+                                    <p id="smartRecommendation">💡 Loading smart recommendations...</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Set Budget -->
+                    <div class="col-md-6 mb-4">
+                        <div class="card feature-card">
+                            <div class="card-body">
+                                <h5 class="card-title">
+                                    <i class="fas fa-cogs me-2"></i>Set Monthly Budget
+                                </h5>
+                                <form id="budgetForm">
+                                    <div class="mb-3">
+                                        <input type="number" class="form-control" id="budgetLimit" placeholder="Monthly Budget (Rs.)" required>
+                                    </div>
+                                    <button type="submit" class="btn btn-success w-100">
+                                        <i class="fas fa-save me-2"></i>Set Budget
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- AI Expense Predictor -->
+                    <div class="col-md-6 mb-4" data-aos="fade-up" data-aos-delay="400">
+                        <div class="card expense-predictor">
+                            <div class="card-body">
+                                <h5 class="card-title">
+                                    <i class="fas fa-crystal-ball me-2"></i>AI Expense Predictor
+                                </h5>
+                                <div id="expensePredictor">
+                                    <div class="text-center">
+                                        <h4 class="animated-counter">Rs. 0</h4>
+                                        <p class="mb-0">Predicted Monthly Spending</p>
+                                        <small class="text-light">Based on current patterns</small>
+                                    </div>
+                                    <div class="mt-3">
+                                        <canvas id="predictionChart" style="max-height: 150px;"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Interactive 50/30/20 Analysis -->
+                    <div class="col-md-6 mb-4" data-aos="fade-up" data-aos-delay="500">
+                        <div class="card analytics">
+                            <div class="card-body">
+                                <h5 class="card-title">
+                                    <i class="fas fa-chart-pie me-2"></i>50/30/20 Smart Analysis
+                                </h5>
+                                <div id="fiftyThirtyTwenty">
+                                    <div class="chart-container">
+                                        <canvas id="fiftyThirtyTwentyChart"></canvas>
+                                    </div>
+                                    <button class="btn btn-light btn-sm" onclick="loadFiftyThirtyTwenty()">
+                                        <i class="fas fa-refresh me-2"></i>Refresh Analysis
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Expenses Tab -->
+            <div class="tab-pane fade" id="expenses" role="tabpanel">
+                <div class="card feature-card">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="card-title mb-0">
+                                <i class="fas fa-list me-2"></i>Recent Expenses
+                            </h5>
+                            <div class="btn-group" role="group">
+                                <button type="button" class="btn btn-outline-primary btn-sm" onclick="loadExpenses('today')">Today</button>
+                                <button type="button" class="btn btn-outline-primary btn-sm" onclick="loadExpenses('week')">Week</button>
+                                <button type="button" class="btn btn-outline-primary btn-sm" onclick="loadExpenses('month')">Month</button>
+                                <button type="button" class="btn btn-outline-primary btn-sm" onclick="loadExpenses('all')">All</button>
+                            </div>
+                        </div>
+                        <div id="expensesList">
+                            <div class="text-center">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Daily Memos Tab -->
+            <div class="tab-pane fade" id="memos" role="tabpanel">
+                <div class="row">
+                    <!-- Add Memo Card -->
+                    <div class="col-md-6 mb-4">
+                        <div class="card feature-card memo-card">
+                            <div class="card-body">
+                                <h5 class="card-title">
+                                    <i class="fas fa-plus-circle me-2"></i>Add Daily Memo
+                                </h5>
+                                <form id="memoForm">
+                                    <div class="mb-3">
+                                        <input type="text" class="form-control" id="memoTitle" placeholder="Memo Title" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <textarea class="form-control" id="memoContent" rows="4" placeholder="Memo Content" required></textarea>
+                                    </div>
+                                    <div class="mb-3">
+                                        <select class="form-control" id="memoPriority">
+                                            <option value="1">Low Priority</option>
+                                            <option value="2">Medium Priority</option>
+                                            <option value="3">High Priority</option>
+                                        </select>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary w-100">
+                                        <i class="fas fa-save me-2"></i>Save Memo
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Memos List -->
+                    <div class="col-md-6 mb-4">
+                        <div class="card feature-card">
+                            <div class="card-body">
+                                <h5 class="card-title">
+                                    <i class="fas fa-sticky-note me-2"></i>Recent Memos
+                                </h5>
+                                <div id="memosList">
+                                    <div class="text-center">
+                                        <div class="spinner-border text-primary" role="status">
+                                            <span class="visually-hidden">Loading...</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bills Tab -->
+            <div class="tab-pane fade" id="bills" role="tabpanel">
+                <div class="row">
+                    <!-- Add Bill Card -->
+                    <div class="col-md-6 mb-4">
+                        <div class="card feature-card bills-card">
+                            <div class="card-body">
+                                <h5 class="card-title">
+                                    <i class="fas fa-plus-circle me-2"></i>Add New Bill
+                                </h5>
+                                <form id="billForm">
+                                    <div class="mb-3">
+                                        <select class="form-control" id="billType" required>
+                                            <option value="">Select Bill Type</option>
+                                            <option value="Electricity">Electricity Bill</option>
+                                            <option value="Water">Water Bill</option>
+                                            <option value="Internet">Internet Bill</option>
+                                            <option value="Mobile">Mobile Bill</option>
+                                            <option value="Gas">Gas Bill</option>
+                                            <option value="Rent">Rent</option>
+                                            <option value="Grocery">Grocery Bill</option>
+                                            <option value="Fuel">Fuel Bill</option>
+                                            <option value="Insurance">Insurance</option>
+                                            <option value="Other">Other</option>
+                                        </select>
+                                    </div>
+                                    <div class="mb-3">
+                                        <input type="number" class="form-control" id="billAmount" placeholder="Bill Amount (Rs.)" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <input type="text" class="form-control" id="billDescription" placeholder="Description (Optional)">
+                                    </div>
+                                    <div class="mb-3">
+                                        <input type="date" class="form-control" id="billDueDate" placeholder="Due Date">
+                                    </div>
+                                    <button type="submit" class="btn btn-primary w-100">
+                                        <i class="fas fa-file-invoice me-2"></i>Add Bill
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Bills List -->
+                    <div class="col-md-6 mb-4">
+                        <div class="card feature-card">
+                            <div class="card-body">
+                                <h5 class="card-title">
+                                    <i class="fas fa-file-invoice-dollar me-2"></i>Bills Overview
+                                </h5>
+                                <div id="billsList">
+                                    <div class="text-center">
+                                        <div class="spinner-border text-primary" role="status">
+                                            <span class="visually-hidden">Loading...</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SMS Parser Tab -->
+            <div class="tab-pane fade" id="sms" role="tabpanel">
+                <div class="card sms-parser">
+                    <div class="card-body">
+                        <h5 class="card-title text-white">
+                            <i class="fas fa-mobile-alt me-2"></i>SMS Expense Parser
+                        </h5>
+                        <p class="text-light">Paste your bank SMS to automatically add expenses</p>
+                        <form id="smsForm">
+                            <div class="mb-3">
+                                <textarea class="form-control" id="smsText" rows="4" placeholder="Paste bank SMS here...
+Example: NIMB Alert: Rs. 1500 debited from your account at ATM. Balance: Rs. 48500"></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-light">
+                                <i class="fas fa-magic me-2"></i>Parse SMS & Add Expense
+                            </button>
+                        </form>
+
+                        <div class="mt-4">
+                            <h6 class="text-light">Supported Banks:</h6>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <ul class="list-unstyled text-light">
+                                        <li><i class="fas fa-check-circle me-2"></i>NIMB</li>
+                                        <li><i class="fas fa-check-circle me-2"></i>NABIL</li>
+                                        <li><i class="fas fa-check-circle me-2"></i>SANIMA</li>
+                                    </ul>
+                                </div>
+                                <div class="col-md-6">
+                                    <ul class="list-unstyled text-light">
+                                        <li><i class="fas fa-check-circle me-2"></i>HIMALAYAN</li>
+                                        <li><i class="fas fa-check-circle me-2"></i>NIC ASIA</li>
+                                        <li><i class="fas fa-check-circle me-2"></i>GLOBAL IME</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Analytics Tab -->
+            <div class="tab-pane fade" id="analytics" role="tabpanel">
+                <div class="row">
+                    <div class="col-md-6 mb-4">
+                        <div class="card feature-card">
+                            <div class="card-body">
+                                <h5 class="card-title">
+                                    <i class="fas fa-lightbulb me-2"></i>Financial Advice
+                                </h5>
+                                <div id="financialAdvice">
+                                    <button class="btn btn-primary" onclick="loadFinancialAdvice()">
+                                        <i class="fas fa-brain me-2"></i>Get Financial Tips
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6 mb-4">
+                        <div class="card feature-card">
+                            <div class="card-body">
+                                <h5 class="card-title">
+                                    <i class="fas fa-chart-bar me-2"></i>Dashboard Stats
+                                </h5>
+                                <div id="dashboardStats">
+                                    <button class="btn btn-info" onclick="loadDashboardStats()">
+                                        <i class="fas fa-chart-line me-2"></i>Load Statistics
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating Action Button -->
+    <button class="fab" onclick="quickAddExpense()" title="Quick Add Expense">
+        <i class="fas fa-plus"></i>
+    </button>
+
+    <!-- Database Access Button (Fixed Position) -->
+    <div class="database-access-btn">
+        <button class="btn btn-dark btn-sm" onclick="window.open('/database-access', '_blank')">
+            <i class="fas fa-database me-1"></i>DB Access
+        </button>
+    </div>
+
+    <!-- Footer -->
+    <footer class="text-center mt-5 py-4">
+        <div class="container">
+            <p class="text-white">
+                Developer: <strong>Bigyan Bhandari</strong> © 2025
+            </p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Global variables
+        let currentUser = '{{ user }}';
+        let charts = {};
+        let isDarkTheme = false;
+        let speechRecognition = null;
+        let currentExpenseData = [];
+        let selectedCategory = 'general';
+
+        // Initialize app with enhanced features
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize AOS animations
+            AOS.init({
+                duration: 800,
+                once: true,
+                offset: 100
+            });
+
+            // Initialize speech recognition
+            initSpeechRecognition();
+            
+            // Load data
+            loadBudgetStatus();
+            loadExpenses('all');
+            initializeCharts();
+            loadSmartInsights();
+            
+            // Set up category buttons
+            setupCategoryButtons();
+            
+            // Auto-refresh data every 30 seconds
+            setInterval(autoRefresh, 30000);
+        });
+
+        // Enhanced notification system
+        function showNotification(message, type = 'info', duration = 5000) {
+            const container = document.getElementById('notificationContainer');
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            
+            const icon = type === 'success' ? 'check-circle' : 
+                        type === 'warning' ? 'exclamation-triangle' : 
+                        type === 'danger' ? 'times-circle' : 'info-circle';
+            
+            notification.innerHTML = `
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-${icon} me-2"></i>
+                    <div class="flex-grow-1">${message}</div>
+                    <button class="btn btn-sm btn-outline-light ms-2" onclick="this.parentElement.parentElement.remove()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            `;
+            
+            container.appendChild(notification);
+            
+            // Show notification with animation
+            setTimeout(() => notification.classList.add('show'), 100);
+            
+            // Auto remove
+            setTimeout(() => {
+                notification.classList.remove('show');
+                setTimeout(() => notification.remove(), 500);
+            }, duration);
+            
+            // Play notification sound
+            playNotificationSound(type);
+        }
+
+        // Notification sound
+        function playNotificationSound(type) {
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const frequency = type === 'success' ? 800 : type === 'warning' ? 600 : 400;
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.frequency.value = frequency;
+            oscillator.type = 'sine';
+            gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.5);
+        }
+
+        // Theme toggle
+        function toggleTheme() {
+            isDarkTheme = !isDarkTheme;
+            const body = document.body;
+            const icon = document.getElementById('themeIcon');
+            
+            if (isDarkTheme) {
+                body.classList.add('dark-theme');
+                icon.className = 'fas fa-sun';
+            } else {
+                body.classList.remove('dark-theme');
+                icon.className = 'fas fa-moon';
+            }
+            
+            // Reinitialize charts with new theme
+            updateChartsTheme();
+        }
+
+        // Speech recognition initialization
+        function initSpeechRecognition() {
+            if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                speechRecognition = new SpeechRecognition();
+                speechRecognition.lang = 'en-US';
+                speechRecognition.continuous = false;
+                speechRecognition.interimResults = false;
+
+                speechRecognition.onresult = function(event) {
+                    const transcript = event.results[0][0].transcript.toLowerCase();
+                    processVoiceInput(transcript);
+                };
+
+                speechRecognition.onerror = function(event) {
+                    showNotification('Voice recognition error. Please try again.', 'warning');
+                    document.getElementById('voiceBtn').classList.remove('recording');
+                };
+
+                speechRecognition.onend = function() {
+                    document.getElementById('voiceBtn').classList.remove('recording');
+                };
+            }
+        }
+
+        // Voice input processing
+        function processVoiceInput(transcript) {
+            const amountMatch = transcript.match(/(\d+)/);
+            const amount = amountMatch ? amountMatch[1] : '';
+            
+            // Set amount
+            if (amount) {
+                document.getElementById('expenseAmount').value = amount;
+            }
+            
+            // Detect category and description
+            const categories = {
+                'food': ['lunch', 'dinner', 'breakfast', 'restaurant', 'eat', 'meal'],
+                'transport': ['taxi', 'bus', 'uber', 'fuel', 'petrol', 'transport'],
+                'entertainment': ['movie', 'cinema', 'game', 'fun', 'entertainment'],
+                'shopping': ['shop', 'buy', 'purchase', 'market', 'clothes'],
+                'utilities': ['bill', 'electricity', 'water', 'internet', 'phone']
+            };
+            
+            for (let category in categories) {
+                if (categories[category].some(keyword => transcript.includes(keyword))) {
+                    selectCategory(category);
+                    document.getElementById('expenseDescription').value = transcript;
+                    break;
+                }
+            }
+            
+            showNotification(`Voice input processed: "${transcript}"`, 'success');
+        }
+
+        // Voice button click
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('voiceBtn')?.addEventListener('click', function() {
+                if (speechRecognition) {
+                    this.classList.add('recording');
+                    speechRecognition.start();
+                    showNotification('Listening... Say amount and description', 'info', 2000);
+                } else {
+                    showNotification('Voice recognition not supported in this browser', 'warning');
+                }
+            });
+        });
+
+        // Category button setup
+        function setupCategoryButtons() {
+            document.querySelectorAll('.category-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const category = this.dataset.category;
+                    selectCategory(category);
+                });
+            });
+        }
+
+        function selectCategory(category) {
+            // Remove active from all buttons
+            document.querySelectorAll('.category-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Add active to selected
+            document.querySelector(`[data-category="${category}"]`).classList.add('active');
+            
+            // Set hidden select value
+            document.getElementById('expenseCategory').value = category;
+            selectedCategory = category;
+        }
+
+        // Initialize charts
+        function initializeCharts() {
+            initBudgetGaugeChart();
+            initVelocityChart();
+            initPredictionChart();
+            initFiftyThirtyTwentyChart();
+        }
+
+        function initBudgetGaugeChart() {
+            const ctx = document.getElementById('budgetGaugeChart');
+            if (!ctx) return;
+
+            charts.budgetGauge = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    datasets: [{
+                        data: [0, 100],
+                        backgroundColor: ['#27ae60', '#ecf0f1'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '70%',
+                    plugins: {
+                        legend: { display: false }
+                    }
+                }
+            });
+        }
+
+        function initVelocityChart() {
+            const ctx = document.getElementById('velocityChart');
+            if (!ctx) return;
+
+            charts.velocity = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Daily Spending',
+                        data: [],
+                        borderColor: '#3498db',
+                        backgroundColor: 'rgba(52, 152, 219, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: { beginAtZero: true }
+                    }
+                }
+            });
+        }
+
+        function initPredictionChart() {
+            const ctx = document.getElementById('predictionChart');
+            if (!ctx) return;
+
+            charts.prediction = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['This Month', 'Predicted'],
+                    datasets: [{
+                        data: [0, 0],
+                        backgroundColor: ['#e74c3c', '#f39c12'],
+                        borderRadius: 5
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    }
+                }
+            });
+        }
+
+        function initFiftyThirtyTwentyChart() {
+            const ctx = document.getElementById('fiftyThirtyTwentyChart');
+            if (!ctx) return;
+
+            charts.fiftyThirtyTwenty = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Needs (50%)', 'Wants (30%)', 'Savings (20%)'],
+                    datasets: [{
+                        data: [50, 30, 20],
+                        backgroundColor: ['#e74c3c', '#f39c12', '#27ae60']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: { color: 'white' }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Auto refresh data
+        function autoRefresh() {
+            loadBudgetStatus();
+            loadSmartInsights();
+            updateChartData();
+        }
+
+        // Load smart insights
+        function loadSmartInsights() {
+            // Simulate smart insights with current data
+            const insights = {
+                weeklySpending: Math.floor(Math.random() * 5000) + 1000,
+                savingsRate: Math.floor(Math.random() * 30) + 5,
+                trend: Math.random() > 0.5 ? '📈' : '📉',
+                recommendation: getSmartRecommendation()
+            };
+
+            document.getElementById('insightSpending').textContent = `Rs. ${insights.weeklySpending}`;
+            document.getElementById('insightSavings').textContent = `${insights.savingsRate}%`;
+            document.getElementById('insightTrend').textContent = insights.trend;
+            document.getElementById('smartRecommendation').innerHTML = `💡 ${insights.recommendation}`;
+        }
+
+        function getSmartRecommendation() {
+            const recommendations = [
+                "Your food expenses are 15% higher than average. Consider meal planning!",
+                "Great job! You're under budget this month. Keep it up!",
+                "Transport costs are trending up. Try carpooling or public transport.",
+                "You saved Rs. 500 on entertainment this week compared to last week!",
+                "Weekend spending is 40% of your weekly budget. Plan weekend activities better.",
+                "Your utility bills are consistent. Consider energy-saving options.",
+                "Shopping expenses peaked on weekends. Try making a shopping list first."
+            ];
+            return recommendations[Math.floor(Math.random() * recommendations.length)];
+        }
+
+        // Quick add expense (FAB)
+        function quickAddExpense() {
+            // Focus on expense amount input and scroll to form
+            document.getElementById('expenseAmount').focus();
+            document.getElementById('dashboard-tab').click();
+            
+            // Show notification
+            showNotification('Quick add activated! Enter your expense details.', 'info', 3000);
+        }
+
+        // Update charts theme
+        function updateChartsTheme() {
+            const textColor = isDarkTheme ? '#ffffff' : '#333333';
+            
+            Object.values(charts).forEach(chart => {
+                if (chart && chart.options) {
+                    if (chart.options.plugins && chart.options.plugins.legend) {
+                        chart.options.plugins.legend.labels.color = textColor;
+                    }
+                    if (chart.options.scales) {
+                        Object.values(chart.options.scales).forEach(scale => {
+                            if (scale.ticks) scale.ticks.color = textColor;
+                            if (scale.grid) scale.grid.color = isDarkTheme ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)';
+                        });
+                    }
+                    chart.update();
+                }
+            });
+        }
+
+        // Update chart data
+        function updateChartData() {
+            if (currentExpenseData.length > 0) {
+                // Update velocity chart with recent expenses
+                const dailyData = calculateDailySpending(currentExpenseData);
+                if (charts.velocity) {
+                    charts.velocity.data.labels = dailyData.labels;
+                    charts.velocity.data.datasets[0].data = dailyData.data;
+                    charts.velocity.update();
+                }
+            }
+        }
+
+        function calculateDailySpending(expenses) {
+            const dailySpending = {};
+            const last7Days = [];
+            
+            for (let i = 6; i >= 0; i--) {
+                const date = new Date();
+                date.setDate(date.getDate() - i);
+                const dateStr = date.toISOString().split('T')[0];
+                last7Days.push(dateStr);
+                dailySpending[dateStr] = 0;
+            }
+            
+            expenses.forEach(expense => {
+                if (expense.type === 'expense' && dailySpending.hasOwnProperty(expense.date)) {
+                    dailySpending[expense.date] += expense.amount;
+                }
+            });
+            
+            return {
+                labels: last7Days.map(date => new Date(date).toLocaleDateString('en-US', { weekday: 'short' })),
+                data: last7Days.map(date => dailySpending[date])
+            };
+        }
+
+        // Legacy alert function (redirects to notification)
+        function showAlert(message, type = 'info') {
+            showNotification(message, type);
+        }
+
+        // Logout function
+        function logout() {
+            fetch('/api/logout', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.href = '/login';
+                }
+            });
+        }
+
+        // Enhanced budget status loading
+        function loadBudgetStatus() {
+            fetch('/api/budget_status')
+            .then(response => response.json())
+            .then(data => {
+                const budgetStatus = document.getElementById('budgetStatus');
+                if (data.monthly_limit > 0) {
+                    const percentage = data.percentage_spent || 0;
+                    const progressClass = percentage > 80 ? 'bg-danger' : percentage > 60 ? 'bg-warning' : 'bg-success';
+
+                    budgetStatus.innerHTML = `
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between">
+                                <span><i class="fas fa-wallet me-1"></i>Budget: Rs. ${data.monthly_limit.toLocaleString()}</span>
+                                <span><i class="fas fa-piggy-bank me-1"></i>Remaining: Rs. ${data.remaining.toLocaleString()}</span>
+                            </div>
+                            <div class="progress mt-2" style="height: 8px;">
+                                <div class="progress-bar ${progressClass}" style="width: ${percentage}%; transition: width 1s ease;"></div>
+                            </div>
+                            <small class="text-light">${percentage.toFixed(1)}% used • ${30 - new Date().getDate()} days left</small>
+                        </div>
+                        <div class="row text-center">
+                            <div class="col">
+                                <h6 class="text-light"><i class="fas fa-minus-circle me-1"></i>Spent</h6>
+                                <h4 class="text-light animated-counter">Rs. ${data.current_spent.toLocaleString()}</h4>
+                            </div>
+                            <div class="col">
+                                <h6 class="text-light"><i class="fas fa-plus-circle me-1"></i>Remaining</h6>
+                                <h4 class="text-light animated-counter">Rs. ${data.remaining.toLocaleString()}</h4>
+                            </div>
+                        </div>
+                    `;
+
+                    // Update gauge chart
+                    if (charts.budgetGauge) {
+                        charts.budgetGauge.data.datasets[0].data = [percentage, 100 - percentage];
+                        charts.budgetGauge.update();
+                    }
+
+                    // Update expense velocity
+                    const dailyAverage = data.current_spent / new Date().getDate();
+                    document.querySelector('#expenseVelocity h3').textContent = `Rs. ${dailyAverage.toFixed(0)}/day`;
+                    
+                } else {
+                    budgetStatus.innerHTML = `
+                        <div class="text-center">
+                            <i class="fas fa-exclamation-triangle fa-3x text-light mb-3"></i>
+                            <p class="text-light">No budget set for this month</p>
+                            <p class="text-light small">Set your monthly budget to start tracking</p>
+                            <button class="btn btn-outline-light btn-sm mt-2" onclick="document.getElementById('budgetLimit').focus()">
+                                <i class="fas fa-cog me-1"></i>Set Budget Now
+                            </button>
+                        </div>
+                    `;
+                }
+            })
+            .catch(error => {
+                console.error('Error loading budget status:', error);
+                showNotification('Failed to load budget status', 'danger');
+            });
+        }
+
+        // Enhanced load expenses with interactions
+        function loadExpenses(filter = 'all') {
+            const expensesList = document.getElementById('expensesList');
+            expensesList.innerHTML = '<div class="text-center"><div class="spinner-border text-primary"></div></div>';
+
+            fetch(`/api/expenses?filter=${filter}`)
+            .then(response => response.json())
+            .then(data => {
+                currentExpenseData = data.expenses || [];
+                let expensesHTML = '';
+
+                if (data.expenses && data.expenses.length > 0) {
+                    data.expenses.forEach((expense, index) => {
+                        const amountClass = expense.type === 'income' ? 'income' : 'amount';
+                        const icon = expense.type === 'income' ? 'fa-plus-circle text-success' : 'fa-minus-circle text-danger';
+                        const categoryEmoji = getCategoryEmoji(expense.category);
+
+                        expensesHTML += `
+                            <div class="expense-item-interactive" data-aos="fade-left" data-aos-delay="${index * 50}" onclick="showExpenseDetails(${expense.id})">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="mb-1">
+                                            <i class="fas ${icon} me-2"></i>
+                                            ${expense.description || 'No description'}
+                                        </h6>
+                                        <small class="text-muted">
+                                            ${categoryEmoji} <span class="badge bg-secondary">${expense.category}</span> • 
+                                            <i class="fas fa-calendar me-1"></i>${expense.date}
+                                            <i class="fas fa-clock ms-2 me-1"></i>${new Date(expense.created_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
+                                        </small>
+                                    </div>
+                                    <div class="text-end">
+                                        <h5 class="mb-0 ${amountClass}">
+                                            ${expense.type === 'income' ? '+' : '-'}Rs. ${expense.amount.toLocaleString()}
+                                        </h5>
+                                        <small class="text-muted">${expense.type}</small>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    });
+                } else {
+                    expensesHTML = `
+                        <div class="text-center py-5" data-aos="fade-up">
+                            <i class="fas fa-receipt fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">No expenses found for ${filter}</h5>
+                            <p class="text-muted">Add some expenses to see them here</p>
+                            <button class="btn btn-primary" onclick="quickAddExpense()">
+                                <i class="fas fa-plus me-2"></i>Add Your First Expense
+                            </button>
+                        </div>
+                    `;
+                }
+
+                expensesList.innerHTML = expensesHTML;
+                
+                // Re-initialize AOS for new elements
+                AOS.refresh();
+                
+                // Update chart data
+                updateChartData();
+            })
+            .catch(error => {
+                console.error('Error loading expenses:', error);
+                expensesList.innerHTML = `
+                    <div class="text-center py-5">
+                        <i class="fas fa-exclamation-triangle fa-3x text-danger mb-3"></i>
+                        <h5 class="text-danger">Failed to load expenses</h5>
+                        <button class="btn btn-outline-primary" onclick="loadExpenses('${filter}')">
+                            <i class="fas fa-retry me-2"></i>Try Again
+                        </button>
+                    </div>
+                `;
+            });
+        }
+
+        function getCategoryEmoji(category) {
+            const emojis = {
+                'food': '🍔',
+                'transport': '🚗',
+                'entertainment': '🎬',
+                'shopping': '🛒',
+                'utilities': '⚡',
+                'general': '📝',
+                'auto-sms': '📱',
+                'bills': '💡',
+                'travel': '✈️'
+            };
+            return emojis[category] || '📝';
+        }
+
+        function showExpenseDetails(expenseId) {
+            const expense = currentExpenseData.find(e => e.id === expenseId);
+            if (expense) {
+                showNotification(`
+                    <strong>${expense.description}</strong><br>
+                    Amount: Rs. ${expense.amount.toLocaleString()}<br>
+                    Category: ${expense.category}<br>
+                    Date: ${expense.date}
+                `, 'info', 4000);
+            }
+        }
+
+        // Load financial advice
+        function loadFinancialAdvice() {
+            fetch('/api/financial_advice')
+            .then(response => response.json())
+            .then(data => {
+                const adviceDiv = document.getElementById('financialAdvice');
+                let adviceHTML = '';
+
+                if (data.financial_advice) {
+                    data.financial_advice.forEach(advice => {
+                        adviceHTML += `
+                            <div class="card mb-3">
+                                <div class="card-body">
+                                    <h6 class="card-title text-primary">${advice.title}</h6>
+                                    <p class="card-text">${advice.description}</p>
+                                    <small class="text-muted"><strong>Tip:</strong> ${advice.tip}</small>
+                                </div>
+                            </div>
+                        `;
+                    });
+                }
+
+                adviceDiv.innerHTML = adviceHTML;
+            })
+            .catch(error => {
+                console.error('Error loading financial advice:', error);
+                showAlert('Failed to load financial advice', 'danger');
+            });
+        }
+
+        // Load 50/30/20 analysis
+        function loadFiftyThirtyTwenty() {
+            fetch('/api/fifty_thirty_twenty')
+            .then(response => response.json())
+            .then(data => {
+                const fiftyDiv = document.getElementById('fiftyThirtyTwenty');
+
+                if (data.error) {
+                    fiftyDiv.innerHTML = `
+                        <p class="text-light">${data.error}</p>
+                        <button class="btn btn-light btn-sm" onclick="loadFiftyThirtyTwenty()">
+                            <i class="fas fa-refresh me-2"></i>Try Again
+                        </button>
+                    `;
+                } else {
+                    const breakdown = data.budget_breakdown;
+                    fiftyDiv.innerHTML = `
+                        <div class="row text-center">
+                            <div class="col-4">
+                                <h6 class="text-light">Needs (50%)</h6>
+                                <h5 class="text-light">Rs. ${breakdown.needs.spent}</h5>
+                                <small class="text-light">of Rs. ${breakdown.needs.allocated}</small>
+                            </div>
+                            <div class="col-4">
+                                <h6 class="text-light">Wants (30%)</h6>
+                                <h5 class="text-light">Rs. ${breakdown.wants.spent}</h5>
+                                <small class="text-light">of Rs. ${breakdown.wants.allocated}</small>
+                            </div>
+                            <div class="col-4">
+                                <h6 class="text-light">Savings (20%)</h6>
+                                <h5 class="text-light">Rs. ${breakdown.savings.remaining}</h5>
+                                <small class="text-light">Available</small>
+                            </div>
+                        </div>
+                    `;
+                }
+            })
+            .catch(error => {
+                console.error('Error loading analysis:', error);
+                showAlert('Failed to load 50/30/20 analysis', 'danger');
+            });
+        }
+
+        // Load dashboard stats
+        function loadDashboardStats() {
+            fetch('/api/stats')
+            .then(response => response.json())
+            .then(data => {
+                const statsDiv = document.getElementById('dashboardStats');
+                statsDiv.innerHTML = `
+                    <div class="row text-center">
+                        <div class="col-6 mb-3">
+                            <h6 class="text-muted">Total Expenses</h6>
+                            <h4 class="text-danger">Rs. ${data.total_expenses || 0}</h4>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <h6 class="text-muted">Total Income</h6>
+                            <h4 class="text-success">Rs. ${data.total_income || 0}</h4>
+                        </div>
+                        <div class="col-12">
+                            <h6 class="text-muted">Net Balance</h6>
+                            <h4 class="${data.net_balance >= 0 ? 'text-success' : 'text-danger'}">
+                                Rs. ${data.net_balance || 0}
+                            </h4>
+                        </div>
+                    </div>
+                `;
+            })
+            .catch(error => {
+                console.error('Error loading stats:', error);
+                showAlert('Failed to load dashboard statistics', 'danger');
+            });
+        }
+
+        // Form submissions
+        document.getElementById('expenseForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const amount = document.getElementById('expenseAmount').value;
+            const description = document.getElementById('expenseDescription').value;
+            const category = document.getElementById('expenseCategory').value;
+
+            fetch('/api/add_expense', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    amount: parseFloat(amount),
+                    description: description,
+                    category: category
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showAlert(data.message, 'success');
+                    if (data.warning) {
+                        showAlert(data.warning, 'warning');
+                    }
+                    document.getElementById('expenseForm').reset();
+                    loadBudgetStatus();
+                    loadExpenses('all');
+                } else {
+                    showAlert(data.error || 'Failed to add expense', 'danger');
+                }
+            })
+            .catch(error => {
+                console.error('Error adding expense:', error);
+                showAlert('Failed to add expense', 'danger');
+            });
+        });
+
+        document.getElementById('budgetForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const limit = document.getElementById('budgetLimit').value;
+
+            fetch('/api/set_budget', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    limit: parseFloat(limit)
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showAlert(data.message, 'success');
+                    document.getElementById('budgetForm').reset();
+                    loadBudgetStatus();
+                    loadFiftyThirtyTwenty();
+                } else {
+                    showAlert(data.error || 'Failed to set budget', 'danger');
+                }
+            })
+            .catch(error => {
+                console.error('Error setting budget:', error);
+                showAlert('Failed to set budget', 'danger');
+            });
+        });
+
+        document.getElementById('smsForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const smsText = document.getElementById('smsText').value;
+
+            fetch('/api/parse_sms', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    message: smsText
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showAlert(data.message, 'success');
+                    if (data.warning) {
+                        showAlert(data.warning, 'warning');
+                    }
+                    document.getElementById('smsForm').reset();
+                    loadBudgetStatus();
+                    loadExpenses('all');
+                } else {
+                    showAlert(data.error || 'Failed to parse SMS', 'danger');
+                }
+            })
+            .catch(error => {
+                console.error('Error parsing SMS:', error);
+                showAlert('Failed to parse SMS', 'danger');
+            });
+        });
+
+        // Memo functions
+        document.getElementById('memoForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const title = document.getElementById('memoTitle').value;
+            const content = document.getElementById('memoContent').value;
+            const priority = document.getElementById('memoPriority').value;
+
+            fetch('/api/add_memo', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    title: title,
+                    content: content,
+                    priority: parseInt(priority)
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showAlert(data.message, 'success');
+                    document.getElementById('memoForm').reset();
+                    loadMemos();
+                } else {
+                    showAlert(data.error, 'danger');
+                }
+            })
+            .catch(error => {
+                console.error('Error adding memo:', error);
+                showAlert('Failed to add memo', 'danger');
+            });
+        });
+
+        function loadMemos() {
+            fetch('/api/memos')
+            .then(response => response.json())
+            .then(data => {
+                let memosHTML = '';
+                if (data.memos && data.memos.length > 0) {
+                    data.memos.forEach(memo => {
+                        const priorityClass = memo.priority === 3 ? 'memo-priority-high' : 
+                                           memo.priority === 2 ? 'memo-priority-medium' : 'memo-priority-low';
+                        const priorityText = memo.priority === 3 ? 'High' : 
+                                           memo.priority === 2 ? 'Medium' : 'Low';
+
+                        memosHTML += `
+                            <div class="memo-item ${priorityClass}">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <h6 class="mb-1">${memo.title}</h6>
+                                        <p class="mb-1 text-muted small">${memo.content}</p>
+                                        <small class="text-muted">
+                                            <i class="fas fa-flag me-1"></i>${priorityText} Priority | ${memo.date}
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    });
+                } else {
+                    memosHTML = '<p class="text-center text-muted">No memos found. Add your first memo!</p>';
+                }
+                document.getElementById('memosList').innerHTML = memosHTML;
+            })
+            .catch(error => {
+                console.error('Error loading memos:', error);
+                document.getElementById('memosList').innerHTML = '<p class="text-center text-danger">Failed to load memos.</p>';
+            });
+        }
+
+        // Bill functions
+        document.getElementById('billForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const billType = document.getElementById('billType').value;
+            const amount = document.getElementById('billAmount').value;
+            const description = document.getElementById('billDescription').value;
+            const dueDate = document.getElementById('billDueDate').value;
+
+            fetch('/api/add_bill', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    bill_type: billType,
+                    amount: parseFloat(amount),
+                    description: description,
+                    due_date: dueDate
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showAlert(data.message, 'success');
+                    document.getElementById('billForm').reset();
+                    loadBills();
+                } else {
+                    showAlert(data.error, 'danger');
+                }
+            })
+            .catch(error => {
+                console.error('Error adding bill:', error);
+                showAlert('Failed to add bill', 'danger');
+            });
+        });
+
+        function loadBills() {
+            fetch('/api/bills')
+            .then(response => response.json())
+            .then(data => {
+                let billsHTML = '';
+                if (data.bills && data.bills.length > 0) {
+                    data.bills.forEach(bill => {
+                        const statusClass = bill.status === 'paid' ? 'bill-paid' : 'bill-pending';
+                        const statusIcon = bill.status === 'paid' ? 'fas fa-check-circle text-success' : 'fas fa-clock text-danger';
+
+                        billsHTML += `
+                            <div class="bill-item ${statusClass}">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <h6 class="mb-1">
+                                            <i class="${statusIcon} me-2"></i>${bill.bill_type}
+                                        </h6>
+                                        <p class="mb-1"><strong>Rs. ${bill.amount}</strong></p>
+                                        ${bill.description ? `<p class="mb-1 text-muted small">${bill.description}</p>` : ''}
+                                        <small class="text-muted">
+                                            ${bill.due_date ? `Due: ${bill.due_date} | ` : ''}${bill.status.toUpperCase()}
+                                        </small>
+                                    </div>
+                                    ${bill.status === 'pending' ? `
+                                        <button class="btn btn-success btn-sm" onclick="payBill(${bill.id})">
+                                            <i class="fas fa-check me-1"></i>Pay
+                                        </button>
+                                    ` : ''}
+                                </div>
+                            </div>
+                        `;
+                    });
+                } else {
+                    billsHTML = '<p class="text-center text-muted">No bills found. Add your first bill!</p>';
+                }
+                document.getElementById('billsList').innerHTML = billsHTML;
+            })
+            .catch(error => {
+                console.error('Error loading bills:', error);
+                document.getElementById('billsList').innerHTML = '<p class="text-center text-danger">Failed to load bills.</p>';
+            });
+        }
+
+        function payBill(billId) {
+            if (confirm('Mark this bill as paid and add to expenses?')) {
+                fetch(`/api/pay_bill/${billId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showAlert(data.message, 'success');
+                        loadBills();
+                        loadBudgetStatus();
+                        loadExpenses();
+                    } else {
+                        showAlert(data.error, 'danger');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error paying bill:', error);
+                    showAlert('Failed to pay bill', 'danger');
+                });
+            }
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadBudgetStatus();
+            loadExpenses();
+            loadFinancialAdvice();
+            loadFiftyThirtyTwenty();
+            loadMemos();
+            loadBills();
+
+            // Add smooth scrolling
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    document.querySelector(this.getAttribute('href')).scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                });
+            });
+        });
+    </script>
+</body>
+</html>
